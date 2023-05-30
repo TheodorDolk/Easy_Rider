@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import datetime
 import time
 
+
 def json_load():
     json_string = input()
     return json.loads(json_string)
@@ -129,15 +130,41 @@ class BusData:
         print(f"Transfer stops: {len(transfer_stops)} {sorted(transfer_stops)}")
         print(f"Finish stops: {len(finish_stops)} {sorted(finish_stops)}")
 
+    # Step 5/6
+    # time (a_time) , bus_line (bus_id), stop_name
+    def time_check(self):
+        fail_string = []
+        skip_bus_line = []
+        for index, stop_1 in enumerate(self.json_objects):
+            if stop_1["bus_id"] not in skip_bus_line:
+                current_bus_line = stop_1["bus_id"]
+                current_time = stop_1["a_time"]
+                current_time = datetime.strptime(current_time, "%H:%M").time()
+                counter = 0
+                if index < len(self.json_objects) - 1:
+                    stop_2 = self.json_objects[index + 1]
+                    if counter == 0:
+                        counter += 1
+                        if current_bus_line == stop_2["bus_id"]:
+                            new_time = stop_2["a_time"]
+                            new_time = datetime.strptime(new_time, "%H:%M").time()
+                            if new_time <= current_time:
+                                fail_string.append(
+                                    f"bus_id line {current_bus_line}: wrong time on station {stop_2['stop_name']}")
+                                skip_bus_line.append(current_bus_line)
+        if fail_string:
+            print("Arrival time test:")
+            for fail in fail_string:
+                print(fail)
+        else:
+            print("OK")
+
 
 def main():
     json_objects = json_load()
     bus_data = BusData(json_objects)
-    start_time = time.time()
+
     bus_data.time_check()
-    end_time = time.time()
-    runtime = end_time - start_time
-    print(f"Runtime: {runtime} seconds")
 
 
 if __name__ == "__main__":
