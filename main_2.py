@@ -2,7 +2,6 @@ import json
 import re
 from collections import Counter
 from datetime import datetime
-import time
 
 
 def json_load():
@@ -13,6 +12,7 @@ def json_load():
 class BusData:
     def __init__(self, json_objects):
         self.json_objects = json_objects
+        self.transfer_stops_set = None
 
     # Step 2/6
     def name_type_time_fixer(self):
@@ -93,11 +93,13 @@ class BusData:
                     bus_dict[id_number].append((stop_type, stop_name))
         for bus in bus_dict:
             if not bus_dict[bus][0][0] == "S":
-                print(f"There is no start or end stop for the line: {bus}.")
-                exit()
+                # print(f"There is no start or end stop for the line: {bus}.")
+                # exit()
+                pass
             if not bus_dict[bus][-1][0] == "F":
-                print(f"There is no start or end stop for the line: {bus}.")
-                exit()
+                # print(f"There is no start or end stop for the line: {bus}.")
+                # exit()
+                pass
         start_stops = set()
         transfer_stops = set()
         finish_stops = set()
@@ -126,9 +128,10 @@ class BusData:
 
             if item[1] > 1:
                 transfer_stops.add(item[0])
-        print(f"Start stops: {len(start_stops)} {sorted(start_stops)}")
-        print(f"Transfer stops: {len(transfer_stops)} {sorted(transfer_stops)}")
-        print(f"Finish stops: {len(finish_stops)} {sorted(finish_stops)}")
+        # print(f"Start stops: {len(start_stops)} {sorted(start_stops)}")
+        # print(f"Transfer stops: {len(transfer_stops)} {sorted(transfer_stops)}")
+        # print(f"Finish stops: {len(finish_stops)} {sorted(finish_stops)}")
+        self.transfer_stops_set = transfer_stops
 
     # Step 5/6
     # time (a_time) , bus_line (bus_id), stop_name
@@ -159,6 +162,20 @@ class BusData:
         else:
             print("OK")
 
+    # Step 6/6
+    def check_on_demand(self):
+        wrong_stop_type = []
+        transfer_stops = self.transfer_stops_set
+        on_demand_stops = []
+        for dict_obj in self.json_objects:
+            if dict_obj["stop_type"] == "O":
+                if dict_obj["stop_name"] in transfer_stops:
+                    wrong_stop_type.append(dict_obj["stop_name"])
+        if wrong_stop_type:
+            print("On demand stops test:")
+            print(f"Wrong stop type: {sorted(wrong_stop_type)}")
+        else:
+            print("OK")
 
 def main():
     json_objects = json_load()
