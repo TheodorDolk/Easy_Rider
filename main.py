@@ -129,6 +129,34 @@ class BusData:
         print(f"Transfer stops: {len(transfer_stops)} {sorted(transfer_stops)}")
         print(f"Finish stops: {len(finish_stops)} {sorted(finish_stops)}")
 
+    # Step 5/6
+    # time (a_time) , bus_line (bus_id), stop_name
+    def time_check(self):
+        fail_string = []
+        checked_lines = []
+        for index, dict_obj in enumerate(self.json_objects):
+            current_bus_line = dict_obj["bus_id"]
+            current_time = dict_obj["a_time"]
+            current_time = datetime.strptime(current_time, "%H:%M").time()
+            if current_bus_line not in checked_lines:
+                for dict_obj_2 in self.json_objects[index + 1:]:
+                    if current_bus_line == dict_obj_2["bus_id"]:
+                        new_time = dict_obj_2["a_time"]
+                        new_time = datetime.strptime(new_time, "%H:%M").time()
+                        if new_time <= current_time:
+                            checked_lines.append(current_bus_line)
+                            fail_string.append(f"bus_id line {current_bus_line}: wrong time on station {dict_obj_2['stop_name']}")
+                            break
+                        else:
+                            current_time = new_time
+
+        if fail_string:
+            print("Arrival time test:")
+            for fail in fail_string:
+                print(fail)
+        else:
+            print("OK")
+
 
 def main():
     json_objects = json_load()

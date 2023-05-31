@@ -180,8 +180,8 @@ class BusData:
 def main():
     json_objects = json_load()
     bus_data = BusData(json_objects)
-
-    bus_data.time_check()
+    bus_data.get_bus_dict()
+    bus_data.check_on_demand()
 
 
 if __name__ == "__main__":
